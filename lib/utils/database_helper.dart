@@ -45,4 +45,31 @@ class DatabaseHelper {
     var insert = await db.insert(noteTable, notes.toMap());
     return insert;
   }
+
+  Future<List<NoteModel>> fetchData() async {
+    Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(noteTable);
+    return List.generate(
+      maps.length,
+      (i) => NoteModel(
+        id: maps[i]['id'],
+        title: maps[i]['title'],
+        content: maps[i]['content'],
+        date: maps[i]['date'],
+      ),
+    );
+  }
+
+  Future<int> updateData(NoteModel notes) async {
+    Database db = await database;
+    var update = await db
+        .update(noteTable, notes.toMap(), where: 'id=?', whereArgs: [notes.id]);
+    return update;
+  }
+
+  Future<int> deleteData(int id) async {
+    Database db = await database;
+    var delete = await db.delete(noteTable, where: 'id:?', whereArgs: [id]);
+    return delete;
+  }
 }
