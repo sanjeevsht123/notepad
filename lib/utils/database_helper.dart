@@ -6,19 +6,19 @@ import 'dart:async';
 import 'dart:io';
 
 class DatabaseHelper {
-  static late Database _database;
-  static late DatabaseHelper _databaseHelper;
+  static Database? _database;
+  static DatabaseHelper? _databaseHelper;
 
   DatabaseHelper._createInstance();
 
   factory DatabaseHelper() {
     _databaseHelper ??= DatabaseHelper._createInstance();
-    return _databaseHelper;
+    return _databaseHelper!;
   }
 
   Future<Database> get database async {
     _database ??= await initializeDatabase();
-    return _database;
+    return _database!;
   }
 
   Future<Database> initializeDatabase() async {
@@ -71,5 +71,12 @@ class DatabaseHelper {
     Database db = await database;
     var delete = await db.delete(noteTable, where: 'id:?', whereArgs: [id]);
     return delete;
+  }
+
+  Future<int?> getNoteCount() async {
+    Database db = await database;
+    int? count = Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM $noteTable'));
+    return count;
   }
 }
