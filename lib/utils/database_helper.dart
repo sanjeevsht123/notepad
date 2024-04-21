@@ -67,9 +67,9 @@ class DatabaseHelper {
     return update;
   }
 
-  Future<int> deleteData(int id) async {
+  Future<int> deleteData(int? id) async {
     Database db = await database;
-    var delete = await db.delete(noteTable, where: 'id:?', whereArgs: [id]);
+    var delete = await db.delete(noteTable, where: 'id=?', whereArgs: [id]);
     return delete;
   }
 

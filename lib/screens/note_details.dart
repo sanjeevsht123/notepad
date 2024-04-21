@@ -1,16 +1,22 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notepad/Models/NoteModel.dart';
 import 'package:notepad/utils/dbState.dart';
 import 'package:intl/intl.dart';
 
 class NoteDetails extends ConsumerWidget {
-  const NoteDetails({super.key});
+  final String mainTitle;
+  final NoteModel notes;
+  const NoteDetails(this.mainTitle, this.notes, {super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    TextEditingController titleController = TextEditingController();
-    TextEditingController containController = TextEditingController();
+    TextEditingController titleController =
+        TextEditingController(text: notes.title);
+    TextEditingController containController =
+        TextEditingController(text: notes.content);
     formateDate() {
       DateTime now = DateTime.now();
       String formatedDate = DateFormat('yyyy-MM-dd').format(now);
@@ -20,7 +26,7 @@ class NoteDetails extends ConsumerWidget {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Add Notes"),
+          title: Text("$mainTitle Notes"),
           centerTitle: true,
           backgroundColor: Colors.blue[500],
         ),
@@ -46,6 +52,8 @@ class NoteDetails extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: TextField(
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
                     controller: containController,
                     decoration: const InputDecoration(
                       border: InputBorder.none,
@@ -54,45 +62,84 @@ class NoteDetails extends ConsumerWidget {
                   ),
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    ElevatedButton(
-                        onPressed: () {
-                          final title = titleController.text;
-                          final content = containController.text;
+                    Expanded(
+                      child: ElevatedButton(
+                          onPressed: () {
+                            if (notes.id == null) {
+                              final title = titleController.text;
+                              final content = containController.text;
 
-                          if (title.isNotEmpty && content.isNotEmpty) {
-                            ref.read(dbStateProvider).addNotes(NoteModel(
-                                  title: title,
-                                  content: content,
-                                  date: formateDate(),
-                                ));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Note Added")));
-                            Future.delayed(const Duration(seconds: 5), () {
-                              Navigator.of(context).pop();
-                            });
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        "Requested to fill all the field !")));
-                          }
+                              if (title.isNotEmpty && content.isNotEmpty) {
+                                ref.read(dbStateProvider).addNotes(NoteModel(
+                                      title: title,
+                                      content: content,
+                                      date: formateDate(),
+                                    ));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text("Note Added")));
+                                Future.delayed(const Duration(seconds: 5), () {
+                                  Navigator.of(context).pop();
+                                });
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "Requested to fill all the field !")));
+                              }
+                            }
+                            //if ends of add logic
+                            else {
+                              final title = titleController.text;
+                              final content = containController.text;
+                              if (title.isNotEmpty && content.isNotEmpty) {
+                                final updateNote = NoteModel(
+                                    id: notes.id,
+                                    title: title,
+                                    content: content,
+                                    date: formateDate());
+                                ref
+                                    .read(dbStateProvider)
+                                    .updateNotes(updateNote);
+                                //popup message
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text("Note Updated")));
+                                Future.delayed(const Duration(seconds: 5), () {
+                                  Navigator.of(context).pop();
+                                });
+                                //popup message
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "Requested to fill all the field !")));
+                              }
+                            }
+                            //else ends of update logic
+                          },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 9)),
+                          child: const Text("Save")),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.1,
+                    ),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
                         },
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 9)),
-                        child: const Text("Save")),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("Cancel"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 9),
+                          backgroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 9),
+                        ),
+                        child: const Text("Cancel"),
                       ),
                     ),
                   ],

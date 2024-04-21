@@ -28,7 +28,7 @@ class DbSataeManagement extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> deleteNotes(int id) async {
+  Future<void> deleteNotes(int? id) async {
     await dbhelper.deleteData(id);
     _notes.removeWhere((note) => note.id == id);
     notifyListeners();
